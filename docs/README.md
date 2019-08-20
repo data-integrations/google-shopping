@@ -1,2 +1,2 @@
 # google-shopping
-Plugins for Google Shopping APIs
+Source Plugin to read Products data from Google Shopping Content APIs.

@@ -8,9 +8,11 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.content.ShoppingContent;
 import com.google.api.services.content.ShoppingContentScopes;
-import com.google.api.services.content.model.ProductsListResponse;
 import com.google.api.services.content.model.Product;
+import com.google.api.services.content.model.ProductsListResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,9 +22,6 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Client to read from Google Shopping Content API.
@@ -42,9 +41,12 @@ public class ShoppingContentClient {
    * Lists the products given a merchant has uploaded to Google Shopping.
    *
    * @param merchantId is the unique identifier for shopping to identify a merchant.
+   * @param maxProducts is the maximum number of products to return in one response, used for
+   * paging. One page of results will in one split.
    * @return A list of products given the merchant has uploaded to Google Shopping.
    */
-  public List<Product> listProductForMerchant(BigInteger merchantId) throws Exception {
+  public List<List<Product>> listProductForMerchant(BigInteger merchantId,
+      Long maxProducts) throws Exception {
     ShoppingContent shoppingContent;
 
     // Initializes a ShoppingContent.
@@ -63,17 +65,22 @@ public class ShoppingContentClient {
 
     ShoppingContent.Products.List productsList = shoppingContent.products().list(merchantId)
         .setIncludeInvalidInsertedItems(true);
-    List<Product> results = new ArrayList<>();
+    List<List<Product>> results = new ArrayList<>();
 
     do {
+      if (maxProducts > 0L) {
+        productsList.setMaxResults(maxProducts);
+      }
+      List<Product> currentPage = new ArrayList<>();
       ProductsListResponse page = productsList.execute();
       if (page.getResources() == null) {
         LOGGER.info("No products found.");
         break;
       }
       for (Product product : page.getResources()) {
-        results.add(product);
+        currentPage.add(product);
       }
+      results.add(currentPage);
       if (page.getNextPageToken() == null) {
         break;
       }
@@ -104,7 +111,6 @@ public class ShoppingContentClient {
                 .fromStream(inputStream, transport, JacksonFactory.getDefaultInstance())
                 .createScoped(ShoppingContentScopes.all());
 
-        // GoogleCredential.fromStream does NOT refresh, since scopes must be added after.
         if (!credential.refreshToken()) {
           LOGGER.debug("The service account access token could not be refreshed.");
           LOGGER.debug("The service account key may have been deleted in the API Console.");

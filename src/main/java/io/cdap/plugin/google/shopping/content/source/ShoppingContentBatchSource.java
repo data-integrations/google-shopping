@@ -1,9 +1,10 @@
 package io.cdap.plugin.google.shopping.content.source;
 
-import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
+import io.cdap.cdap.api.annotation.Description;
+import io.cdap.cdap.api.annotation.Name;
+import io.cdap.cdap.api.annotation.Plugin;
 import io.cdap.cdap.api.data.batch.Input;
-import io.cdap.cdap.format.StructuredRecordStringConverter;
 import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.api.dataset.lib.KeyValue;
@@ -11,62 +12,68 @@ import io.cdap.cdap.etl.api.Emitter;
 import io.cdap.cdap.etl.api.PipelineConfigurer;
 import io.cdap.cdap.etl.api.batch.BatchSource;
 import io.cdap.cdap.etl.api.batch.BatchSourceContext;
-import io.cdap.cdap.api.annotation.Description;
-import io.cdap.cdap.api.annotation.Name;
-import io.cdap.cdap.api.annotation.Plugin;
+import io.cdap.cdap.etl.api.validation.InvalidConfigPropertyException;
+import io.cdap.cdap.format.StructuredRecordStringConverter;
+import io.cdap.plugin.common.LineageRecorder;
+
 import org.apache.hadoop.io.Text;
+
+import java.io.IOException;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * A BatchSource plugin to read products from Google Shopping content API.
+ * https://developers.google.com/shopping-content/v2/reference/v2.1/products
  */
 @Plugin(type = BatchSource.PLUGIN_TYPE)
 @Name("ShoppingContent")
 @Description("A Google shopping content API Batch Source")
-public class ShoppingContentBatchSource extends BatchSource<Text, ProductWritable, StructuredRecord> {
+public class ShoppingContentBatchSource extends
+    BatchSource<Text, ProductWritable, StructuredRecord> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ShoppingContentBatchSource.class);
-    private final ShoppingContentConfig config;
+  private static final Logger LOGGER = LoggerFactory.getLogger(ShoppingContentBatchSource.class);
+  private final ShoppingContentConfig config;
 
-    public ShoppingContentBatchSource(ShoppingContentConfig config) {
-        this.config = config;
+  public ShoppingContentBatchSource(ShoppingContentConfig config) {
+    this.config = config;
+  }
+
+  @Override
+  public void configurePipeline(PipelineConfigurer configurer) {
+    config.validate();
+    try {
+      LOGGER.info("Set output schema \n");
+      configurer.getStageConfigurer()
+          .setOutputSchema(Schema.parseJson(ShoppingContentConstants.PRODUCT_SCHEMA));
+    } catch (IOException e) {
+      LOGGER.debug("IOException \n" + e.getMessage());
+      throw new InvalidConfigPropertyException(e.getMessage(), e, "schema");
     }
+  }
 
-    @Override
-    public void configurePipeline(PipelineConfigurer configurer) {
-        configurer.getStageConfigurer().setOutputSchema(null);
-    }
 
-    @Override
-    public void prepareRun(BatchSourceContext context) {
-        context.setInput(Input.of(config.referenceName, new ShoppingContentInputFormatProvider(config)));
-    }
+  @Override
+  public void prepareRun(BatchSourceContext context) throws Exception {
+    context
+        .setInput(Input.of(config.referenceName, new ShoppingContentInputFormatProvider(config)));
 
-    @Override
-    public void transform(KeyValue<Text, ProductWritable> input,
-                          Emitter<StructuredRecord> emitter) throws Exception {
-        Schema productSchema = Schema.parseJson(ShoppingContentConstants.PRODUCT_SCHEMA);
+    // Record lineage.
+    LineageRecorder lineageRecorder = new LineageRecorder(context, config.referenceName);
+    lineageRecorder.recordRead("Read", "Read from Google Shopping Content API.",
+        Schema.parseJson(ShoppingContentConstants.PRODUCT_SCHEMA).getFields().stream()
+            .map(Schema.Field::getName).collect(
+            Collectors.toList()));
+  }
 
-//        Schema productIdSchema = Schema.of(Schema.Type.STRING);
-//        Schema.Field productIdField = Schema.Field.of("id", productIdSchema);
-//        Schema productColorSchema = Schema.of(Schema.Type.STRING);
-//        Schema.Field productColorField = Schema.Field.of("color", productColorSchema);
-//
-//        Schema productSchema = Schema.recordOf("product", productIdField, productColorField);
-
-        String productString = new Gson().toJson(input.getValue().getProduct());
-        LOGGER.debug("product string is " + productString);
-
-        StructuredRecord productRecord = StructuredRecordStringConverter.fromJsonString(productString, productSchema);
-
-        String structureString = StructuredRecordStringConverter.toJsonString(productRecord);
-
-        LOGGER.debug("structure string is " + structureString);
-//        StructuredRecord.Builder builder = StructuredRecord.builder(productSchema);
-//        builder.set("id", input.getValue().getProduct().getId());
-//        builder.set("color", input.getValue().getProduct().getColor());
-//        emitter.emit(builder.build());
-        emitter.emit(productRecord);
-    }
+  @Override
+  public void transform(KeyValue<Text, ProductWritable> input,
+      Emitter<StructuredRecord> emitter) throws Exception {
+    Schema productSchema = Schema.parseJson(ShoppingContentConstants.PRODUCT_SCHEMA);
+    String productString = new Gson().toJson(input.getValue().getProduct());
+    StructuredRecord productRecord = StructuredRecordStringConverter
+        .fromJsonString(productString, productSchema);
+    emitter.emit(productRecord);
+  }
 }

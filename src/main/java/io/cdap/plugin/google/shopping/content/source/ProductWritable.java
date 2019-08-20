@@ -1,14 +1,15 @@
 package io.cdap.plugin.google.shopping.content.source;
 
-import com.google.api.services.content.model.Product;
 import com.google.gson.Gson;
+
 import org.apache.hadoop.io.Writable;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
 /**
- * A wrapper for {@link Product} which implements {@link Writable} interface.
+ * The {@link Writable} interface for {@link ProductWrapper}.
  */
 public class ProductWritable implements Writable {
 
