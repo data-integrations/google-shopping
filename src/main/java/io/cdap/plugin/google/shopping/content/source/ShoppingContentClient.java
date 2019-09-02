@@ -25,82 +25,111 @@ import java.util.List;
 
 /**
  * Client to read from Google Shopping Content API.
+ * It provides an iterator interface to get Products from Shopping Content API.
  */
 public class ShoppingContentClient {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ShoppingContentClient.class);
 
-  // Service account file path.
-  private String serviceAccountPath;
+  private static final long MAX_PRODUCTS = 10L;
 
-  public ShoppingContentClient(String serviceAccountPath) {
+  private final String serviceAccountPath;
+
+  private final BigInteger merchantId;
+
+  private final ShoppingContent shoppingContent;
+
+  private final HttpTransport httpTransport;
+
+  private String nextPageToken = null;
+
+  private boolean end = false;
+
+  private List<Product> currentPage;
+
+  public ShoppingContentClient(String serviceAccountPath,
+      String merchantId) throws IOException, GeneralSecurityException {
     this.serviceAccountPath = serviceAccountPath;
-  }
+    this.merchantId = new BigInteger(merchantId);
+    this.httpTransport = createHttpTransport();
 
-  /**
-   * Lists the products given a merchant has uploaded to Google Shopping.
-   *
-   * @param merchantId is the unique identifier for shopping to identify a merchant.
-   * @param maxProducts is the maximum number of products to return in one response, used for
-   * paging. One page of results will in one split.
-   * @return A list of products given the merchant has uploaded to Google Shopping.
-   */
-  public List<List<Product>> listProductForMerchant(BigInteger merchantId,
-      Long maxProducts) throws Exception {
-    ShoppingContent shoppingContent;
+    HttpRequestInitializer initializer;
 
-    // Initializes a ShoppingContent.
-    try {
-      HttpTransport httpTransport = createHttpTransport();
-      HttpRequestInitializer initializer = loadCredential(serviceAccountPath, httpTransport);
-
-      ShoppingContent.Builder builder =
-          new ShoppingContent.Builder(httpTransport, JacksonFactory.getDefaultInstance(),
-              initializer);
-      shoppingContent = builder.build();
-    } catch (IOException e) {
-      throw new IOException(
-          "Could not initialize shopping content client.");
+    if (serviceAccountPath.isEmpty()) {
+      // Uses default credential is service account file is not provided.
+      initializer = GoogleCredential.getApplicationDefault();
+    } else {
+      initializer = loadCredential(serviceAccountPath, httpTransport);
     }
 
-    ShoppingContent.Products.List productsList = shoppingContent.products().list(merchantId)
-        .setIncludeInvalidInsertedItems(true);
-    List<List<Product>> results = new ArrayList<>();
-
-    do {
-      if (maxProducts > 0L) {
-        productsList.setMaxResults(maxProducts);
-      }
-      List<Product> currentPage = new ArrayList<>();
-      ProductsListResponse page = productsList.execute();
-      if (page.getResources() == null) {
-        LOGGER.info("No products found.");
-        break;
-      }
-      for (Product product : page.getResources()) {
-        currentPage.add(product);
-      }
-      results.add(currentPage);
-      if (page.getNextPageToken() == null) {
-        break;
-      }
-      productsList.setPageToken(page.getNextPageToken());
-    } while (true);
-
-    return results;
+    ShoppingContent.Builder builder =
+        new ShoppingContent.Builder(httpTransport, JacksonFactory.getDefaultInstance(),
+            initializer);
+    this.shoppingContent = builder.build();
   }
 
   /**
-   * Given the path to service account file, it loads a file named service-account.json and uses
-   * that json to authenticate with Google Shopping.
+   * If true, we can call getNextPage().
+   * */
+  public boolean hasNextPage() throws IOException {
+    ShoppingContent.Products.List productsList = shoppingContent.products().list(merchantId)
+        .setIncludeInvalidInsertedItems(true);
+
+    if (end) {
+      return false;
+    }
+
+    currentPage = new ArrayList<>();
+
+    if (MAX_PRODUCTS > 0L) {
+      productsList.setMaxResults(MAX_PRODUCTS);
+    }
+
+    if (nextPageToken != null) {
+      productsList.setPageToken(nextPageToken);
+    }
+
+    ProductsListResponse page = productsList.execute();
+
+    if (page.getResources() == null || page.getResources().isEmpty()) {
+      LOGGER.info("No products found.");
+      return false;
+    }
+
+    for (Product product : page.getResources()) {
+      currentPage.add(product);
+    }
+
+    if (page.getNextPageToken() != null) {
+      nextPageToken = page.getNextPageToken();
+    } else {
+      nextPageToken = null;
+      end = true;
+    }
+
+    return true;
+  }
+
+  /**
+   * Lists a page of products given a merchant has uploaded to Google Shopping.
+   * Valid iff hasNextPage() returns true.
+   * @return A list of products given the merchant has uploaded to Google Shopping.
+   */
+  public List<Product> getNextPage() {
+    return currentPage;
+  }
+
+  /**
+   * Given the path to service account file, it loads a file named service-account.json and uses that json to
+   * authenticate with Google Shopping.
    *
-   * @param serviceAccountPath The path to the service account file.
+   * @param serviceAccountPath The full path to the service account file.
    * @param transport A HttpTransport.
    * @return An authorized {@link Credential} object.
    */
   private Credential loadCredential(String serviceAccountPath, HttpTransport transport)
       throws IOException {
-    File serviceAccountFile = new File(serviceAccountPath, "service-account.json");
+    File serviceAccountFile = new File(serviceAccountPath);
 
     if (serviceAccountFile.exists()) {
       LOGGER.info("Loading service account credentials.");
@@ -124,13 +153,7 @@ public class ShoppingContentClient {
     return null;
   }
 
-  private HttpTransport createHttpTransport() throws IOException {
-    try {
-      return GoogleNetHttpTransport.newTrustedTransport();
-    } catch (GeneralSecurityException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-    return null;
+  private HttpTransport createHttpTransport() throws IOException, GeneralSecurityException {
+    return GoogleNetHttpTransport.newTrustedTransport();
   }
 }

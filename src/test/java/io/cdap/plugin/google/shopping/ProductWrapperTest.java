@@ -13,7 +13,7 @@ import org.junit.Test;
 public class ProductWrapperTest {
 
   @Test
-  public void ProductAspectConversion() {
+  public void productAspectConversion() {
     ProductAspect aspect = new ProductAspect();
     aspect.setAspectName("name");
     aspect.setIntention("intention");
@@ -27,7 +27,7 @@ public class ProductWrapperTest {
   }
 
   @Test
-  public void ProductConversion() {
+  public void productConversion() {
     Product product = new Product();
     LoyaltyPoints loyaltyPoints = new LoyaltyPoints();
     loyaltyPoints.setRatio(2.1);
@@ -46,12 +46,12 @@ public class ProductWrapperTest {
 
     ProductWrapper wrapper = ProductWrapper.from(product);
 
-    Assert.assertEquals((long)wrapper.installment.months, 3L);
+    Assert.assertEquals((long) wrapper.installment.months, 3L);
     Assert.assertEquals(wrapper.installment.amount.currency, "USD");
     Assert.assertEquals(wrapper.installment.amount.value, "2.3");
     Assert.assertEquals(wrapper.loyaltyPoints.name, "name");
-    Assert.assertEquals((double)wrapper.loyaltyPoints.ratio, (double)2.1, 0);
-    Assert.assertEquals((long)wrapper.loyaltyPoints.pointsValue, 6L);
+    Assert.assertEquals((double) wrapper.loyaltyPoints.ratio, (double) 2.1, 0);
+    Assert.assertEquals((long) wrapper.loyaltyPoints.pointsValue, 6L);
   }
 
 }

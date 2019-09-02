@@ -5,6 +5,9 @@ Description
 -----------
 This source reads product data from Google Shopping Content API.
 
+It outputs Products read from Shopping Content API in StructureRecord format, the output schema is aligned with Shopping
+Content Product definition. You can checkout the schema definition at productschema.json file.
+
 Configuration
 -------------
 
@@ -12,6 +15,3 @@ Configuration
 
 **Service Account File Path**: Path on the local file system of the service account key used for
 authorization. When running on other clusters, the file must be present on every node in the cluster.
-
-**Max Products:** The maximum number of products to process in a mapper. We use this as the
-maxResults when talking to Content API, which is specifying the pagination size.

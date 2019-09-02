@@ -1,11 +1,10 @@
 package io.cdap.plugin.google.shopping.content.source;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.nio.file.Files;
 
 /**
  * Constants used by Shopping content related files.
@@ -16,18 +15,18 @@ public class ShoppingContentConstants {
 
   public static final String SERVICE_ACCOUNT_PATH = "serviceaccount.path";
   public static final String MERCHANT_ID = "merchant id";
-  public static final String MAX_PRODUCTS = "max products";
   // Schema of product to represent Product(https://developers.google.com/shopping-content/v2/reference/v2.1/products).
-  public static String PRODUCT_SCHEMA;
+  public static final String PRODUCT_SCHEMA;
 
   static {
-    try{
+    byte[] bytes = new byte[0];
+    try {
       ClassLoader classLoader = new ShoppingContentConstants().getClass().getClassLoader();
       File file = new File(classLoader.getResource("productschema.json").getFile());
-      PRODUCT_SCHEMA = new String(Files.readAllBytes(file.toPath()));
+      bytes = Files.readAllBytes(file.toPath());
     } catch (Exception e) {
       LOGGER.debug("Reading productschema.json failed.");
     }
+    PRODUCT_SCHEMA = new String(bytes);
   }
-
 }

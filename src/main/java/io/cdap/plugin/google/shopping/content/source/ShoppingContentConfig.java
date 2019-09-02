@@ -6,7 +6,6 @@ import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.plugin.PluginConfig;
 import io.cdap.cdap.etl.api.validation.InvalidConfigPropertyException;
 import java.math.BigInteger;
-import javax.annotation.Nullable;
 
 /**
  * Configurations for making Shopping Content API calls.
@@ -29,19 +28,8 @@ public class ShoppingContentConfig extends PluginConfig {
   @Macro
   private String serviceAccountPath;
 
-  @Name("maxProducts")
-  @Nullable
-  @Description("The maximum number of products to process in a mapper. We use this as the "
-      + "maxResults when talking to Content API, which is specifying the pagination size. ")
-  @Macro
-  private String maxProducts;
-
   public String getMerchantId() {
     return merchantId;
-  }
-
-  public String getMaxProducts() {
-    return maxProducts;
   }
 
   public String getServiceAccountPath() {
@@ -54,15 +42,6 @@ public class ShoppingContentConfig extends PluginConfig {
     } catch (NumberFormatException e) {
       throw new InvalidConfigPropertyException("Merchant Id can't be converted into a BigInteger",
           "merchantId");
-    }
-
-    if (maxProducts != null) {
-      try {
-        Long converted = Long.parseLong(maxProducts);
-      } catch (NumberFormatException e) {
-        throw new InvalidConfigPropertyException("maxProducts can't be converted into a Long",
-            "maxProducts");
-      }
     }
   }
 }

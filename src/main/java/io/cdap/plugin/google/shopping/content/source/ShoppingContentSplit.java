@@ -1,8 +1,5 @@
 package io.cdap.plugin.google.shopping.content.source;
 
-import com.google.api.services.content.model.Product;
-import com.google.gson.Gson;
-
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.slf4j.Logger;
@@ -11,8 +8,9 @@ import org.slf4j.LoggerFactory;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.security.GeneralSecurityException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A input split containing products reading from Google Shopping Content API.
@@ -21,54 +19,41 @@ public class ShoppingContentSplit extends InputSplit implements Writable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ShoppingContentBatchSource.class);
 
-  private List<ProductWrapper> productList;
+  private String serviceAccountPath;
 
-  public ShoppingContentSplit(List<Product> products) {
-    productList = new ArrayList<>();
+  private String merchantId;
 
-    for (Product p : products) {
-      productList.add(ProductWrapper.from(p));
-    }
+  private ShoppingContentClient client;
+
+  public ShoppingContentSplit(String serviceAccountPath, String merchantId) {
+    this.serviceAccountPath = serviceAccountPath;
+    this.merchantId = merchantId;
   }
 
-  public ShoppingContentSplit() {
+  public ShoppingContentSplit() throws IOException, GeneralSecurityException {
     // Default constructor here is needed for Hadoop deserialization.
+    this.client = new ShoppingContentClient(serviceAccountPath, merchantId);
   }
 
-  public List<ProductWrapper> getProductList() {
-    return productList;
+  public boolean hasNextPage() throws IOException {
+    return client.hasNextPage();
+  }
+
+  public List<ProductWritable> getNextPage() {
+    return client.getNextPage()
+        .stream().map(p -> new ProductWritable(ProductWrapper.from(p))).collect(Collectors.toList());
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    int size = in.readInt();
-
-    if (size > 0) {
-      productList = new ArrayList<>();
-    }
-
-    for (int i = 0; i < size; i++) {
-      // Deserialize an instance of Product.
-      int length = in.readInt();
-      byte[] buf = new byte[length];
-      in.readFully(buf);
-      String productstring = new String(buf, "UTF-8");
-      ProductWrapper product = new Gson().fromJson(productstring, ProductWrapper.class);
-      this.productList.add(product);
-    }
-
+    this.serviceAccountPath = in.readUTF();
+    this.merchantId = in.readUTF();
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeInt(this.productList.size());
-
-    for (int i = 0; i < this.productList.size(); i++) {
-      // Serialize each product into Json string.
-      byte[] buf = new Gson().toJson(this.productList.get(i)).getBytes();
-      out.writeInt(buf.length);
-      out.write(buf);
-    }
+    out.writeUTF(this.serviceAccountPath);
+    out.writeUTF(this.merchantId);
   }
 
   @Override

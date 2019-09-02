@@ -5,6 +5,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -12,38 +13,39 @@ import java.util.List;
  */
 public class ShoppingContentRecordReader extends RecordReader<Text, ProductWritable> {
 
-  // Current product ID.
-  private Text currentProductId;
-  // Current product.
-  private ProductWritable currentProduct;
-  private List<ProductWrapper> productList;
+  private List<ProductWritable> productList;
   private int currentIndex = 0;
+  private ShoppingContentSplit shoppingContentSplit;
 
   @Override
   public void initialize(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) {
-    ShoppingContentSplit shoppingContentSplit = (ShoppingContentSplit) inputSplit;
-    productList = shoppingContentSplit.getProductList();
+    shoppingContentSplit = (ShoppingContentSplit) inputSplit;
   }
 
   @Override
-  public boolean nextKeyValue() {
-    if (currentIndex >= productList.size()) {
+  public boolean nextKeyValue() throws IOException {
+
+    if (currentIndex < productList.size()) {
+      return true;
+    }
+
+    if (!shoppingContentSplit.hasNextPage()) {
       return false;
     }
-    currentProductId = new Text(productList.get(currentIndex).id);
-    currentProduct = new ProductWritable(productList.get(currentIndex));
-    currentIndex++;
+
+    productList = shoppingContentSplit.getNextPage();
+    currentIndex = 0;
     return true;
   }
 
   @Override
   public Text getCurrentKey() {
-    return currentProductId;
+    return new Text(productList.get(currentIndex).getProduct().id);
   }
 
   @Override
   public ProductWritable getCurrentValue() {
-    return currentProduct;
+    return productList.get(currentIndex);
   }
 
   @Override
