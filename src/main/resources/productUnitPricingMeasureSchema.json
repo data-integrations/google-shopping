@@ -1,0 +1,20 @@
+{
+  "type": "record",
+  "name": "ProductUnitPricingMeasure",
+  "fields": [
+    {
+      "name": "unit",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "value",
+      "type": [
+        "double",
+        "null"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "type": "record",
+  "name": "Installment",
+  "fields": [
+    {
+      "name": "amount",
+      "type": [
+        {
+          "type": "record",
+          "name": "Price",
+          "fields": [
+            {
+              "name": "currency",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            {
+              "name": "value",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ]
+        },
+        "null"
+      ]
+    },
+    {
+      "name": "months",
+      "type": [
+        "long",
+        "null"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "type": "record",
+  "name": "ProductShipping",
+  "fields": [
+    {
+      "name": "country",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "locationGroupName",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "locationId",
+      "type": [
+        "long",
+        "null"
+      ]
+    },
+    {
+      "name": "postalCode",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "price",
+      "type": [
+        {
+          "type": "record",
+          "name": "Price",
+          "fields": [
+            {
+              "name": "currency",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            {
+              "name": "value",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ]
+        },
+        "null"
+      ],
+    },
+    {
+      "name": "region",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "service",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  ]
+}

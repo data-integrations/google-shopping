@@ -2,11 +2,12 @@ package io.cdap.plugin.google.shopping.content.source;
 
 import com.google.common.collect.ImmutableMap;
 import io.cdap.cdap.api.data.batch.InputFormatProvider;
+
 import java.util.Map;
 
 /**
  * An {@link InputFormatProvider} for ShoppingContent API.
- * */
+ */
 public class ShoppingContentInputFormatProvider implements InputFormatProvider {
 
   private final Map<String, String> conf;

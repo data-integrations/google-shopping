@@ -1,0 +1,27 @@
+{
+  "type": "record",
+  "name": "LoyaltyPoints",
+  "fields": [
+    {
+      "name": "name",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "pointsValue",
+      "type": [
+        "long",
+        "null"
+      ]
+    },
+    {
+      "name": "ratio",
+      "type": [
+        "double",
+        "null"
+      ]
+    }
+  ]
+}

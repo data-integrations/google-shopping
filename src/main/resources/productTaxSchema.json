@@ -1,0 +1,48 @@
+{
+  "type": "record",
+  "name": "ProductTax",
+  "fields": [
+    {
+      "name": "country",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "locationId",
+      "type": [
+        "long",
+        "null"
+      ]
+    },
+    {
+      "name": "postalCode",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "rate",
+      "type": [
+        "double",
+        "null"
+      ]
+    },
+    {
+      "name": "region",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "taxShip",
+      "type": [
+        "boolean",
+        "null"
+      ]
+    }
+  ]
+}

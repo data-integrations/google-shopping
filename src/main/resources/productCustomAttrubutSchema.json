@@ -1,0 +1,34 @@
+{
+  "type": "record",
+  "name": "ProductCustomAttribute",
+  "fields": [
+    {
+      "name": "name",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "type",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "unit",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "value",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  ]
+}

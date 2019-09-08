@@ -1,0 +1,27 @@
+{
+  "type": "record",
+  "name": "ProductAspect",
+  "fields": [
+    {
+      "name": "aspectName",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "destinationName",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "intention",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  ]
+}

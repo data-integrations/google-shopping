@@ -5,7 +5,9 @@ import io.cdap.cdap.api.annotation.Macro;
 import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.plugin.PluginConfig;
 import io.cdap.cdap.etl.api.validation.InvalidConfigPropertyException;
+
 import java.math.BigInteger;
+import javax.annotation.Nullable;
 
 /**
  * Configurations for making Shopping Content API calls.
@@ -14,7 +16,7 @@ public class ShoppingContentConfig extends PluginConfig {
 
   @Name("referenceName")
   @Description("This will be used to uniquely identify this source/sink for lineage, annotating"
-      + " metadata, etc.")
+          + " metadata, etc.")
   public String referenceName;
 
   @Name("merchantID")
@@ -24,8 +26,9 @@ public class ShoppingContentConfig extends PluginConfig {
 
   @Name("serviceAccountPath")
   @Description("The path to locate service-account.json file which is used to authenticate with "
-      + "Shopping Content API.")
+          + "Shopping Content API.")
   @Macro
+  @Nullable
   private String serviceAccountPath;
 
   public String getMerchantId() {
@@ -41,7 +44,7 @@ public class ShoppingContentConfig extends PluginConfig {
       BigInteger converted = new BigInteger(merchantId);
     } catch (NumberFormatException e) {
       throw new InvalidConfigPropertyException("Merchant Id can't be converted into a BigInteger",
-          "merchantId");
+              "merchantId");
     }
   }
 }

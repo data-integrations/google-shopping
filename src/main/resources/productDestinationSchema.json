@@ -1,0 +1,20 @@
+{
+  "type": "record",
+  "name": "ProductDestination",
+  "fields": [
+    {
+      "name": "destinationName",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "intention",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  ]
+}
