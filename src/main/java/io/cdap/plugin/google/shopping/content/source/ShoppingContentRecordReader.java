@@ -6,12 +6,13 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.content.ShoppingContentScopes;
-
 import com.google.api.services.content.model.Product;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,6 +36,8 @@ public class ShoppingContentRecordReader extends RecordReader<Text, Product> {
 
   @Override
   public void initialize(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) {
+    productList = new ArrayList<>();
+
     // Initialize a ShoppingContentClient.
     ShoppingContentSplit shoppingContentSplit = (ShoppingContentSplit) inputSplit;
     Credential credential;
