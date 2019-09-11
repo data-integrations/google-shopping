@@ -1,3 +1,19 @@
+/*
+ * Copyright © 2019 Cask Data, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package io.cdap.plugin.google.shopping.content.source;
 
 import com.google.api.services.content.model.Error;
@@ -8,28 +24,28 @@ import com.google.api.services.content.model.ProductCustomGroup;
 import com.google.api.services.content.model.ProductDestination;
 import com.google.api.services.content.model.ProductShipping;
 import com.google.api.services.content.model.ProductTax;
-
 import io.cdap.cdap.api.data.format.StructuredRecord;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Transform a {@link com.google.api.services.content.model.Product} into
- * {@link io.cdap.cdap.api.data.format.StructuredRecord}.
+ * Transform a {@link com.google.api.services.content.model.Product} into {@link io.cdap.cdap.api.data.format.StructuredRecord}.
  */
 public class ProductToStructureRecordTransform {
-  public static StructuredRecord productToStructureRecord(Product product) {
-    StructuredRecord.Builder builder = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA);
 
-    builder.set("additionalImageLinks", product.getAdditionalImageLinks() == null ? new ArrayList<StructuredRecord>() :
-            product.getAdditionalImageLinks());
+  public static StructuredRecord productToStructureRecord(Product product) {
+    StructuredRecord.Builder builder = StructuredRecord
+        .builder(ShoppingContentConstants.PRODUCT_SCHEMA);
+
+    builder.set("additionalImageLinks",
+                product.getAdditionalImageLinks() == null ? new ArrayList<StructuredRecord>() :
+                    product.getAdditionalImageLinks());
     builder.set("additionalProductTypes", product.getAdditionalProductTypes() == null ?
-            new ArrayList<StructuredRecord>() : product.getAdditionalProductTypes());
+        new ArrayList<StructuredRecord>() : product.getAdditionalProductTypes());
     builder.set("adult", product.getAdult());
     builder.set("adwordsGrouping", product.getAdwordsGrouping());
     builder.set("adwordsLabels", product.getAdwordsLabels() == null ?
-            new ArrayList<StructuredRecord>() : product.getAdwordsLabels());
+        new ArrayList<StructuredRecord>() : product.getAdwordsLabels());
     builder.set("adwordsRedirect", product.getAdwordsRedirect());
     builder.set("ageGroup", product.getAgeGroup());
 
@@ -38,7 +54,8 @@ public class ProductToStructureRecordTransform {
 
       for (ProductAspect aspect : product.getAspects()) {
         StructuredRecord.Builder builder1 = StructuredRecord.builder(
-                ShoppingContentConstants.PRODUCT_SCHEMA.getField("aspects").getSchema().getComponentSchema());
+            ShoppingContentConstants.PRODUCT_SCHEMA.getField("aspects").getSchema()
+                                                   .getComponentSchema());
         builder1.set("aspectName", aspect.getAspectName());
         builder1.set("destinationName", aspect.getDestinationName());
         builder1.set("intention", aspect.getIntention());
@@ -60,8 +77,9 @@ public class ProductToStructureRecordTransform {
 
     if (product.getCustomAttributes() != null) {
       for (ProductCustomAttribute productCustomAttribute : product.getCustomAttributes()) {
-        StructuredRecord.Builder builder1 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-                .getField("customAttributes").getSchema().getComponentSchema());
+        StructuredRecord.Builder builder1 = StructuredRecord
+            .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                         .getField("customAttributes").getSchema().getComponentSchema());
         builder1.set("name", productCustomAttribute.getName());
         builder1.set("type", productCustomAttribute.getType());
         builder1.set("unit", productCustomAttribute.getUnit());
@@ -75,14 +93,16 @@ public class ProductToStructureRecordTransform {
 
     if (product.getCustomGroups() != null) {
       for (ProductCustomGroup productCustomGroup : product.getCustomGroups()) {
-        StructuredRecord.Builder builder1 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-                .getField("customGroups").getSchema().getComponentSchema());
+        StructuredRecord.Builder builder1 = StructuredRecord
+            .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                         .getField("customGroups").getSchema().getComponentSchema());
 
         List<StructuredRecord> attributes = new ArrayList<>();
 
         for (ProductCustomAttribute productCustomAttribute : productCustomGroup.getAttributes()) {
-          StructuredRecord.Builder builder2 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-                  .getField("customAttributes").getSchema().getComponentSchema());
+          StructuredRecord.Builder builder2 = StructuredRecord
+              .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                           .getField("customAttributes").getSchema().getComponentSchema());
           builder2.set("name", productCustomAttribute.getName());
           builder2.set("type", productCustomAttribute.getType());
           builder2.set("unit", productCustomAttribute.getUnit());
@@ -110,8 +130,9 @@ public class ProductToStructureRecordTransform {
 
     if (product.getDestinations() != null) {
       for (ProductDestination destination : product.getDestinations()) {
-        StructuredRecord.Builder builder1 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-                .getField("destinations").getSchema().getComponentSchema());
+        StructuredRecord.Builder builder1 = StructuredRecord
+            .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                         .getField("destinations").getSchema().getComponentSchema());
         builder1.set("destinationName", destination.getDestinationName());
         builder1.set("intention", destination.getIntention());
         destinations.add(builder1.build());
@@ -122,7 +143,7 @@ public class ProductToStructureRecordTransform {
     builder.set("displayAdsId", product.getDisplayAdsId());
     builder.set("displayAdsLink", product.getDisplayAdsLink());
     builder.set("displayAdsSimilarIds", product.getDisplayAdsSimilarIds() == null ?
-            new ArrayList<StructuredRecord>() : product.getDisplayAdsSimilarIds());
+        new ArrayList<StructuredRecord>() : product.getDisplayAdsSimilarIds());
     builder.set("displayAdsTitle", product.getDisplayAdsTitle());
     builder.set("displayAdsValue", product.getDisplayAdsValue());
 
@@ -136,13 +157,15 @@ public class ProductToStructureRecordTransform {
     builder.set("imageLink", product.getImageLink());
 
     if (product.getInstallment() != null) {
-      StructuredRecord.Builder builder1 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-              .getField("installment").getSchema().getNonNullable());
+      StructuredRecord.Builder builder1 = StructuredRecord
+          .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                       .getField("installment").getSchema().getNonNullable());
 
       if (product.getInstallment().getAmount() != null) {
-        StructuredRecord.Builder builder2 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-                .getField("installment").getSchema().getNonNullable().getField("amount").getSchema()
-                .getNonNullable());
+        StructuredRecord.Builder builder2 = StructuredRecord
+            .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                         .getField("installment").getSchema().getNonNullable().getField("amount").getSchema()
+                         .getNonNullable());
         builder2.set("currency", product.getInstallment().getAmount().getCurrency());
         builder2.set("value", product.getInstallment().getAmount().getValue());
         builder1.set("amount", builder2.build());
@@ -159,8 +182,9 @@ public class ProductToStructureRecordTransform {
     // loyaltyPoints
     if (product.getLoyaltyPoints() != null) {
 
-      StructuredRecord.Builder builder1 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-              .getField("loyaltyPoints").getSchema().getNonNullable());
+      StructuredRecord.Builder builder1 = StructuredRecord
+          .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                       .getField("loyaltyPoints").getSchema().getNonNullable());
       builder1.set("name", product.getLoyaltyPoints().getName());
       builder1.set("pointsValue", product.getLoyaltyPoints().getPointsValue());
       builder1.set("ratio", product.getLoyaltyPoints().getRatio());
@@ -178,9 +202,10 @@ public class ProductToStructureRecordTransform {
     builder.set("pattern", product.getPattern());
 
     if (product.getPrice() != null) {
-      StructuredRecord.Builder builder1 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-              .getField("installment").getSchema().getNonNullable().getField("amount").getSchema()
-              .getNonNullable());
+      StructuredRecord.Builder builder1 = StructuredRecord
+          .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                       .getField("installment").getSchema().getNonNullable().getField("amount").getSchema()
+                       .getNonNullable());
       builder1.set("currency", product.getPrice().getCurrency());
       builder1.set("value", product.getPrice().getValue());
       builder.set("price", builder1.build());
@@ -188,12 +213,13 @@ public class ProductToStructureRecordTransform {
 
     builder.set("productType", product.getProductType());
     builder.set("promotionIds", product.getPromotionIds() == null ?
-            new ArrayList<StructuredRecord>() : product.getPromotionIds());
+        new ArrayList<StructuredRecord>() : product.getPromotionIds());
 
     if (product.getSalePrice() != null) {
-      StructuredRecord.Builder builder1 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-              .getField("installment").getSchema().getNonNullable().getField("amount").getSchema()
-              .getNonNullable());
+      StructuredRecord.Builder builder1 = StructuredRecord
+          .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                       .getField("installment").getSchema().getNonNullable().getField("amount").getSchema()
+                       .getNonNullable());
       builder1.set("currency", product.getSalePrice().getCurrency());
       builder1.set("value", product.getSalePrice().getValue());
       builder.set("salePrice", builder1.build());
@@ -207,17 +233,20 @@ public class ProductToStructureRecordTransform {
 
     if (product.getShipping() != null) {
       for (ProductShipping shipping : product.getShipping()) {
-        StructuredRecord.Builder builder1 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-                .getField("shipping").getSchema().getComponentSchema());
+        StructuredRecord.Builder builder1 = StructuredRecord
+            .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                         .getField("shipping").getSchema().getComponentSchema());
         builder1.set("country", shipping.getCountry());
         builder1.set("locationGroupName", shipping.getLocationGroupName());
         builder1.set("locationId", shipping.getLocationId());
         builder1.set("postalCode", shipping.getPostalCode());
 
         if (shipping.getPrice() != null) {
-          StructuredRecord.Builder builder2 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-                  .getField("installment").getSchema().getNonNullable().getField("amount").getSchema()
-                  .getNonNullable());
+          StructuredRecord.Builder builder2 = StructuredRecord
+              .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                           .getField("installment").getSchema().getNonNullable().getField("amount")
+                           .getSchema()
+                           .getNonNullable());
           builder2.set("currency", shipping.getPrice().getCurrency());
           builder2.set("value", shipping.getPrice().getValue());
           builder1.set("price", builder2.build());
@@ -232,8 +261,9 @@ public class ProductToStructureRecordTransform {
 
     // shippingHeight
     if (product.getShippingHeight() != null) {
-      StructuredRecord.Builder builder1 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-              .getField("shippingHeight").getSchema().getNonNullable());
+      StructuredRecord.Builder builder1 = StructuredRecord
+          .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                       .getField("shippingHeight").getSchema().getNonNullable());
       builder1.set("unit", product.getShippingHeight().getUnit());
       builder1.set("value", product.getShippingHeight().getValue());
       builder.set("shippingHeight", builder1.build());
@@ -244,8 +274,9 @@ public class ProductToStructureRecordTransform {
 
     // shippingLength
     if (product.getShippingLength() != null) {
-      StructuredRecord.Builder builder1 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-              .getField("shippingHeight").getSchema().getNonNullable());
+      StructuredRecord.Builder builder1 = StructuredRecord
+          .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                       .getField("shippingHeight").getSchema().getNonNullable());
       builder1.set("unit", product.getShippingLength().getUnit());
       builder1.set("value", product.getShippingLength().getValue());
       builder.set("shippingLength", builder1.build());
@@ -253,8 +284,9 @@ public class ProductToStructureRecordTransform {
 
     // shippingWeight
     if (product.getShippingWeight() != null) {
-      StructuredRecord.Builder builder1 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-              .getField("shippingWeight").getSchema().getNonNullable());
+      StructuredRecord.Builder builder1 = StructuredRecord
+          .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                       .getField("shippingWeight").getSchema().getNonNullable());
       builder1.set("unit", product.getShippingWeight().getUnit());
       builder1.set("value", product.getShippingWeight().getValue());
       builder.set("shippingWeight", builder1.build());
@@ -262,8 +294,9 @@ public class ProductToStructureRecordTransform {
 
     // shippingWidth
     if (product.getShippingWidth() != null) {
-      StructuredRecord.Builder builder1 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-              .getField("shippingHeight").getSchema().getNonNullable());
+      StructuredRecord.Builder builder1 = StructuredRecord
+          .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                       .getField("shippingHeight").getSchema().getNonNullable());
       builder1.set("unit", product.getShippingWidth().getUnit());
       builder1.set("value", product.getShippingWidth().getValue());
       builder.set("shippingWidth", builder1.build());
@@ -271,7 +304,8 @@ public class ProductToStructureRecordTransform {
 
     builder.set("sizeSystem", product.getSizeSystem());
     builder.set("sizeType", product.getSizeType());
-    builder.set("sizes", product.getSizes() == null ? new ArrayList<StructuredRecord>() : product.getSizes());
+    builder.set("sizes",
+                product.getSizes() == null ? new ArrayList<StructuredRecord>() : product.getSizes());
     builder.set("targetCountry", product.getTargetCountry());
 
     // taxes
@@ -279,8 +313,9 @@ public class ProductToStructureRecordTransform {
 
     if (product.getTaxes() != null) {
       for (ProductTax tax : product.getTaxes()) {
-        StructuredRecord.Builder builder2 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-                .getField("taxes").getSchema().getComponentSchema());
+        StructuredRecord.Builder builder2 = StructuredRecord
+            .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                         .getField("taxes").getSchema().getComponentSchema());
         builder2.set("country", tax.getCountry());
         builder2.set("locationId", tax.getLocationId());
         builder2.set("postalCode", tax.getPostalCode());
@@ -297,8 +332,9 @@ public class ProductToStructureRecordTransform {
 
     // unitPricingBaseMeasure
     if (product.getUnitPricingBaseMeasure() != null) {
-      StructuredRecord.Builder builder1 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-              .getField("unitPricingBaseMeasure").getSchema().getNonNullable());
+      StructuredRecord.Builder builder1 = StructuredRecord
+          .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                       .getField("unitPricingBaseMeasure").getSchema().getNonNullable());
       builder1.set("unit", product.getUnitPricingBaseMeasure().getUnit());
       builder1.set("value", product.getUnitPricingBaseMeasure().getValue());
       builder.set("unitPricingBaseMeasure", builder1.build());
@@ -306,23 +342,25 @@ public class ProductToStructureRecordTransform {
 
     // unitPricingMeasure
     if (product.getUnitPricingMeasure() != null) {
-      StructuredRecord.Builder builder1 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-              .getField("unitPricingMeasure").getSchema().getNonNullable());
+      StructuredRecord.Builder builder1 = StructuredRecord
+          .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                       .getField("unitPricingMeasure").getSchema().getNonNullable());
       builder1.set("unit", product.getUnitPricingMeasure().getUnit());
       builder1.set("value", product.getUnitPricingMeasure().getValue());
       builder.set("unitPricingMeasure", builder1.build());
     }
 
     builder.set("validatedDestinations", product.getValidatedDestinations() == null ?
-            new ArrayList<StructuredRecord>() : product.getValidatedDestinations());
+        new ArrayList<StructuredRecord>() : product.getValidatedDestinations());
 
     // warnings
     List<StructuredRecord> warnings = new ArrayList<>();
 
     if (product.getWarnings() != null) {
       for (Error error : product.getWarnings()) {
-        StructuredRecord.Builder builder1 = StructuredRecord.builder(ShoppingContentConstants.PRODUCT_SCHEMA
-                .getField("warnings").getSchema().getComponentSchema());
+        StructuredRecord.Builder builder1 = StructuredRecord
+            .builder(ShoppingContentConstants.PRODUCT_SCHEMA
+                         .getField("warnings").getSchema().getComponentSchema());
         builder1.set("domain", error.getDomain());
         builder1.set("message", error.getMessage());
         builder1.set("reason", error.getReason());

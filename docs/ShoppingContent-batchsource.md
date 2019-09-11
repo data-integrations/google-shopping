@@ -6,7 +6,7 @@ Description
 This source reads product data from Google Shopping Content API.
 
 It outputs Products read from Shopping Content API in StructureRecord format, the output schema is aligned with Shopping
-Content Product definition. You can checkout the schema definition at productschema.json file.
+Content Product definition.
 
 Configuration
 -------------

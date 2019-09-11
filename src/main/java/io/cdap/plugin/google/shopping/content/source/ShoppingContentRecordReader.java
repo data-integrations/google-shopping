@@ -1,3 +1,19 @@
+/*
+ * Copyright © 2019 Cask Data, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package io.cdap.plugin.google.shopping.content.source;
 
 import com.google.api.client.auth.oauth2.Credential;
@@ -7,15 +23,6 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.content.ShoppingContentScopes;
 import com.google.api.services.content.model.Product;
-
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.RecordReader;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -23,11 +30,18 @@ import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.RecordReader;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A {@link RecordReader} to read products from Google Shopping Content API.
  */
-public class ShoppingContentRecordReader extends RecordReader<Text, Product> {
+public class ShoppingContentRecordReader extends RecordReader<NullWritable, Product> {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(ShoppingContentRecordReader.class);
 
   private List<Product> productList;
@@ -51,8 +65,8 @@ public class ShoppingContentRecordReader extends RecordReader<Text, Product> {
       } else {
         credential = loadCredential(shoppingContentSplit.getServiceAccountPath(), httpTransport);
       }
-      shoppingContentClient = new ShoppingContentClient(
-              shoppingContentSplit.getMerchantId(), httpTransport, credential);
+      shoppingContentClient = new ShoppingContentClient(shoppingContentSplit.getMerchantId(), httpTransport,
+                                                        credential);
     } catch (GeneralSecurityException | IOException e) {
       LOGGER.debug("Failed to initialize Shopping Content API client: " + e.getMessage());
     }
@@ -77,8 +91,8 @@ public class ShoppingContentRecordReader extends RecordReader<Text, Product> {
   }
 
   @Override
-  public Text getCurrentKey() {
-    return new Text(productList.get(currentIndex).getId());
+  public NullWritable getCurrentKey() {
+    return NullWritable.get();
   }
 
   @Override
@@ -90,11 +104,11 @@ public class ShoppingContentRecordReader extends RecordReader<Text, Product> {
    * Creates a {@link Credential} from the path to a service account file,
    *
    * @param serviceAccountPath The full path to the service account file.
-   * @param transport          A HttpTransport.
+   * @param transport A HttpTransport.
    * @return An authorized {@link Credential} object or NULL.
    */
   private Credential loadCredential(String serviceAccountPath, HttpTransport transport)
-          throws IOException {
+      throws IOException {
     File serviceAccountFile = new File(serviceAccountPath);
 
     if (!serviceAccountFile.exists()) {
@@ -105,12 +119,13 @@ public class ShoppingContentRecordReader extends RecordReader<Text, Product> {
 
     try (InputStream inputStream = new FileInputStream(serviceAccountFile)) {
       GoogleCredential credential =
-              GoogleCredential
-                      .fromStream(inputStream, transport, JacksonFactory.getDefaultInstance())
-                      .createScoped(ShoppingContentScopes.all());
+          GoogleCredential
+              .fromStream(inputStream, transport, JacksonFactory.getDefaultInstance())
+              .createScoped(ShoppingContentScopes.all());
 
       if (!credential.refreshToken()) {
-        LOGGER.debug("The service account access token could not be refreshed. Please ensure that the " +
+        LOGGER.debug(
+            "The service account access token could not be refreshed. Please ensure that the " +
                 "service account exists.");
         throw new IOException("Failed to refresh service account token");
       }
