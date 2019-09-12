@@ -44,6 +44,8 @@ public class ShoppingContentRecordReader extends RecordReader<NullWritable, Prod
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ShoppingContentRecordReader.class);
 
+  public static final String AUTO_DETECT = "auto-detect";
+
   private List<Product> productList;
   private int currentIndex = -1;
   private ShoppingContentClient shoppingContentClient;
@@ -59,7 +61,8 @@ public class ShoppingContentRecordReader extends RecordReader<NullWritable, Prod
     try {
       HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 
-      if (shoppingContentSplit.getServiceAccountPath().isEmpty()) {
+      if (shoppingContentSplit.getServiceAccountPath().isEmpty() || AUTO_DETECT
+          .equals(shoppingContentSplit.getServiceAccountPath())) {
         // Uses default credential is service account file is not provided.
         credential = GoogleCredential.getApplicationDefault();
       } else {
