@@ -30,7 +30,7 @@
     <spark.version>1.6.1</spark.version>
     <cdap.version>6.0.0</cdap.version>
     <cdap.plugin.version>2.2.0</cdap.plugin.version>
-    <hadoop.version>2.3.0</hadoop.version>
+    <hadoop.version>3.2.3</hadoop.version>
   </properties>
 
   <repositories>
